@@ -17,8 +17,8 @@ class LibUSBConan(ConanFile):
     release_name = "%s-%s" % (name, version)
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False]}
-    default_options = "shared=True"
+    options = {"shared": [True, False], "udev": [True, False]}
+    default_options = "shared=True", "udev=True"
     url = "http://github.com/uilianries/conan-libusb"
     author = "Uilian Ries <uilianries@gmail.com>"
     license = "https://github.com/libusb/libusb/blob/master/COPYING"
@@ -43,9 +43,10 @@ class LibUSBConan(ConanFile):
         env_build = AutoToolsBuildEnvironment(self)
         with environment_append(env_build.vars):
             library_type = "--disable-static --enable-shared" if self.options.shared else "--disable-shared --enable-static"
+            udev = "--enable-udev" if self.options.udev else "--disable-udev"
             prefix = "--prefix=%s" % self.prefix_install
-            self.run("cd %s && ./configure %s %s" %
-                     (self.release_name, prefix, library_type))
+            self.run("cd %s && ./configure %s %s %s" %
+                     (self.release_name, prefix, library_type, udev))
             self.run("cd %s && make" % self.release_name)
             self.run("cd %s && make install" % self.release_name)
 
