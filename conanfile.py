@@ -28,17 +28,6 @@ class LibUSBConan(ConanFile):
         if self.settings.os != "Linux":
             raise Exception("Only linux compatible")
 
-    def system_requirements(self):
-        self.global_system_requirements = True
-        if self.settings.os == "Linux":
-            self.output.warn(
-                "'libudev' library is required in your computer. Enter sudo password if required..."
-            )
-            self.run("sudo apt-get install -y libudev0 libudev0:i386 || true ")
-            self.run("sudo apt-get install -y libudev1 libudev1:i386 || true ")
-            self.run(
-                "sudo apt-get install -y libudev-dev libudev-dev:i386 || true ")
-
     def source(self):
         package_name = "%s.tar.bz2" % self.release_name
         url = "https://github.com/libusb/libusb/releases/download/v%s/%s" % (
@@ -49,6 +38,10 @@ class LibUSBConan(ConanFile):
         unlink(package_name)
 
     def build(self):
+        if self.settings.os == "Linux":
+            self.output.warn("'libudev' library is required in your computer.")
+            arch = "amd64" if self.settings.arch == "x86_64" else "i386"
+            self.run("sudo apt-get install -y libudev-dev:%s || true " % arch)
         self.prefix_install = "%s/%s/_build" % (self.conanfile_directory,
                                                 self.release_name)
         env_build = AutoToolsBuildEnvironment(self)

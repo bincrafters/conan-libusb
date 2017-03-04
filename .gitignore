@@ -2,3 +2,5 @@
 __pycache__/*
 test_package/__pycache__/*
 test_package/build/*
+test_package/*.pyc
+*.pyc
