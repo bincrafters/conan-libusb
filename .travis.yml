@@ -8,7 +8,7 @@ env:
     - CONAN_UPLOAD=1
     - CONAN_REFERENCE="libusb/1.0.21"
     - CONAN_USERNAME="uilianries"
-    - CONAN_CHANNEL="testing"
+    - CONAN_CHANNEL="ci"
     - CONAN_TOTAL_PAGES=1
     - CONAN_CURRENT_PAGE=1
     - CONAN_STABLE_BRANCH_PATTERN="release/*"
