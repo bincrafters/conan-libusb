@@ -18,8 +18,8 @@ if [[ "$(uname -s)" == 'Darwin' ]]; then
     pyenv rehash
     pyenv activate conan
 elif [[ "$(uname -s)" == 'Linux' ]]; then
-    apt-get update
-    apt-get install -y libudev-dev
+    sudo apt-get update
+    sudo apt-get install -y libudev-dev
 fi
 
 pip install --upgrade conan_package_tools # It install conan too
