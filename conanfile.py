@@ -37,19 +37,21 @@ class LibUSBConan(ConanFile):
         unzip(package_name)
         unlink(package_name)
 
-    def build(self):
+    def system_requirements(self):
+        self.global_system_requirements=True
         if self.settings.os == "Linux":
             self.output.warn("'libudev' library is required in your computer.")
+            # (uilianries): Could not possible install i386 and amd64 versions at same time.
             arch = "amd64" if self.settings.arch == "x86_64" else "i386"
             self.run("sudo apt-get install -y libudev-dev:%s || true " % arch)
-        self.prefix_install = "%s/%s/_build" % (self.conanfile_directory,
-                                                self.release_name)
+
+    def build(self):
+        self.prefix_install = "%s/%s/_build" % (self.conanfile_directory, self.release_name)
         env_build = AutoToolsBuildEnvironment(self)
         with environment_append(env_build.vars):
             udev = "--enable-udev" if self.options.udev else "--disable-udev"
             prefix = "--prefix=%s" % self.prefix_install
-            self.run("cd %s && ./configure %s %s" %
-                     (self.release_name, prefix, udev))
+            self.run("cd %s && ./configure %s %s" % (self.release_name, prefix, udev))
             self.run("cd %s && make" % self.release_name)
             self.run("cd %s && make install" % self.release_name)
 
