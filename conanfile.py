@@ -17,8 +17,8 @@ class LibUSBConan(ConanFile):
     release_name = "%s-%s" % (name, version)
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "udev": [True, False]}
-    default_options = "shared=True", "udev=True"
+    options = {"udev": [True, False]}
+    default_options = "udev=True"
     url = "http://github.com/uilianries/conan-libusb"
     author = "Uilian Ries <uilianries@gmail.com>"
     license = "https://github.com/libusb/libusb/blob/master/COPYING"
@@ -27,6 +27,17 @@ class LibUSBConan(ConanFile):
     def configure(self):
         if self.settings.os != "Linux":
             raise Exception("Only linux compatible")
+
+    def system_requirements(self):
+        self.global_system_requirements = True
+        if self.settings.os == "Linux":
+            self.output.warn(
+                "'libudev' library is required in your computer. Enter sudo password if required..."
+            )
+            self.run("sudo apt-get install -y libudev0 libudev0:i386 || true ")
+            self.run("sudo apt-get install -y libudev1 libudev1:i386 || true ")
+            self.run(
+                "sudo apt-get install -y libudev-dev libudev-dev:i386 || true ")
 
     def source(self):
         package_name = "%s.tar.bz2" % self.release_name
@@ -42,11 +53,10 @@ class LibUSBConan(ConanFile):
                                                 self.release_name)
         env_build = AutoToolsBuildEnvironment(self)
         with environment_append(env_build.vars):
-            library_type = "--disable-static --enable-shared" if self.options.shared else "--disable-shared --enable-static"
             udev = "--enable-udev" if self.options.udev else "--disable-udev"
             prefix = "--prefix=%s" % self.prefix_install
-            self.run("cd %s && ./configure %s %s %s" %
-                     (self.release_name, prefix, library_type, udev))
+            self.run("cd %s && ./configure %s %s" %
+                     (self.release_name, prefix, udev))
             self.run("cd %s && make" % self.release_name)
             self.run("cd %s && make install" % self.release_name)
 
