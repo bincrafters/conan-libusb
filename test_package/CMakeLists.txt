@@ -9,7 +9,7 @@ conan_basic_setup()
 
 # Build application #######################################
 add_executable(${PROJECT_NAME} testlibusb.c)
-target_link_libraries(${PROJECT_NAME} ${POCO_LIBS})
+target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})
 
 # Add test ################################################
 enable_testing()
