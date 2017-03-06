@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/uilianries/conan-libusb.svg?branch=master)](https://travis-ci.org/uilianries/conan-libusb)
+[![Build Status](https://travis-ci.org/uilianries/conan-libusb.svg?branch=release/1.0.21-amd64 )](https://travis-ci.org/uilianries/conan-libusb) [![License (LGPL version 2.1)](https://img.shields.io/badge/license-GNU%20LGPL%20version%202.1-blue.svg?style=flat-square)](http://opensource.org/licenses/LGPL-2.1)
 
 # conan-libusb
 
