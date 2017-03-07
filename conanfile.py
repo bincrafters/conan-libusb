@@ -39,7 +39,7 @@ class LibUSBConan(ConanFile):
             self.output.warn("'libudev' library is required in your computer.")
             # (uilianries): Could not possible install i386 and amd64 versions at same time.
             arch = "amd64" if self.settings.arch == "x86_64" else "i386"
-            self.run("sudo apt-get install -y libudev-dev:%s || true " % arch)
+            self.run("sudo apt-get update && sudo apt-get install -y libudev-dev:%s || true " % arch)
 
     def build(self):
         self.prefix_install = "%s/%s/_build" % (self.conanfile_directory, self.release_name)
