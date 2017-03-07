@@ -24,10 +24,6 @@ class LibUSBConan(ConanFile):
     license = "https://github.com/libusb/libusb/blob/master/COPYING"
     prefix_install = "%s/_build" % release_name
 
-    def configure(self):
-        if self.settings.os != "Linux":
-            raise Exception("Only linux compatible")
-
     def source(self):
         package_name = "%s.tar.bz2" % self.release_name
         url = "https://github.com/libusb/libusb/releases/download/v%s/%s" % (
