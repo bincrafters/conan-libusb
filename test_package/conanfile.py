@@ -7,20 +7,26 @@ from conans import ConanFile, CMake
 class TestLibUSBConan(ConanFile):
     """Build test using target package and execute all tests
     """
+    target = "libusb"
+    version = "1.0.21"
+    name = "%s-test" % target
     channel = getenv("CONAN_CHANNEL", "testing")
-    username = getenv("CONAN_USERNAME", "uilianries")
+    user = getenv("CONAN_USERNAME", "uilianries")
     settings = "os", "compiler", "build_type", "arch"
-    requires = "libusb/1.0.21@%s/%s" % (username, channel)
+    requires = "%s/%s@%s/%s" % (target, version, user, channel)
+    author = "Uilian Ries <uilianries@gmail.com"
+    license = "LGPL-2.1"
     generators = "cmake"
 
     def build(self):
         cmake = CMake(self.settings)
-        self.run('cmake "%s" %s' %
-                 (self.conanfile_directory, cmake.command_line))
-        self.run("cmake --build . %s" % cmake.build_config)
+        cmake.configure(self, source_dir=self.conanfile_directory, build_dir="./")
+        cmake.build(self)
 
     def imports(self):
         self.copy(pattern="*.so*", dst="bin", src="lib")
 
     def test(self):
-        self.run("cmake --build . --target test")
+        cmake = CMake(self.settings)
+        cmake.configure(self, source_dir=self.conanfile_directory, build_dir="./")
+        cmake.build(self, target="test")
