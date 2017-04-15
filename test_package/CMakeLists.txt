@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.1)
 project(conan-libusb-test)
 
 set(CMAKE_VERBOSE_MAKEFILE TRUE)
@@ -12,6 +12,7 @@ file(GLOB SOURCE_FILES src/*.c)
 
 # Build application #######################################
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
+set_property(TARGET ${PROJECT_NAME} PROPERTY C_STANDARD 99)
 target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})
 
 # Add test #####################################################################

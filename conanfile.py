@@ -1,16 +1,18 @@
 """Conan receipt package for USB Library 1.0.21
 """
+from shutil import copyfile
 from tempfile import mkdtemp
 from os import unlink
 from os.path import join
 from conans import ConanFile
+from conans import CMake
+from conans import AutoToolsBuildEnvironment
 from conans.tools import download
 from conans.tools import unzip
-from conans.tools import check_md5
 from conans.tools import chdir
+from conans.tools import check_md5
 from conans.tools import SystemPackageTool
 from conans.tools import environment_append
-from conans import AutoToolsBuildEnvironment
 
 
 class LibUSBConan(ConanFile):
@@ -21,12 +23,13 @@ class LibUSBConan(ConanFile):
     release_name = "%s-%s" % (name, version)
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False],"udev": [True, False]}
-    default_options = "shared=True", "udev=True"
+    options = {"shared": [True, False] }
+    default_options = "shared=True"
     url = "http://github.com/uilianries/conan-libusb"
     author = "Uilian Ries <uilianries@gmail.com>"
     license = "LGPL-2.1"
     description = "A cross-platform library to access USB devices"
+    exports = ["CMakeLists.txt", "Findlibusb-1.0.cmake"]
     build_dir = mkdtemp(suffix=name)
 
     def source(self):
@@ -35,36 +38,46 @@ class LibUSBConan(ConanFile):
         check_md5(tar_name, "1da9ea3c27b3858fa85c5f4466003e44")
         unzip(tar_name)
         unlink(tar_name)
+        copyfile("CMakeLists.txt", join(self.release_name, "CMakeLists.txt"))
 
     def system_requirements(self):
-        if self.options.udev and self.settings.os == "Linux":
+        if self.settings.os == "Linux":
             package_tool = SystemPackageTool()
             arch = "i386" if self.settings.arch == "x86" else "amd64"
             package_tool.install(packages="libudev-dev:%s" % arch, update=True)
 
     def build(self):
-        env_build = AutoToolsBuildEnvironment(self)
-        env_build.fpic = True
-        with environment_append(env_build.vars):
-            with chdir(self.release_name):
-                shared_option = "--disable-static" if self.options.shared else "--disable-shared"
-                udev_option = "--enable-udev" if self.options.udev else "--disable-udev"
-                self.run("./configure --prefix=%s %s %s" % (self.build_dir, shared_option, udev_option))
-                self.run("make")
-                self.run("make install")
+        if self.settings.compiler == "Visual Studio":
+            shared = { "BUILD_SHARED_LIBS": self.options.shared }
+            cmake = CMake(self.settings)
+            cmake.configure(self, source_dir=self.release_name, defs=shared)
+            cmake.build(self)
+        else:
+            env_build = AutoToolsBuildEnvironment(self)
+            env_build.fpic = True
+            with environment_append(env_build.vars):
+                with chdir(self.release_name):
+                    shared_option = "--disable-static" if self.options.shared else "--disable-shared"
+                    self.run("./configure --prefix=%s %s" % (self.build_dir, shared_option))
+                    self.run("make")
+                    self.run("make install")
 
     def package(self):
-        self.copy(pattern="*.h", dst="include", src=join(self.build_dir, "include"))
-        self.copy(pattern="*.a", dst="lib", src=join(self.build_dir, "lib"))
-        self.copy(pattern="*.so*", dst="lib", src=join(self.build_dir, "lib"))
-        self.copy(pattern="*.dylib", dst="lib", src=join(self.build_dir, "lib"))
+        if self.settings.compiler == "Visual Studio":
+            self.copy(pattern="libusb.h", dst=join("include", "libusb-1.0"), src=join(self.release_name, "libusb"))
+            self.copy(pattern="*.lib", dst="lib", keep_path=False)
+            self.copy(pattern="*.dll", dst="bin", keep_path=False)
+        else:
+            self.copy(pattern="*.h", dst="include", src=join(self.build_dir, "include"))
+            self.copy(pattern="*.a", dst="lib", src=join(self.build_dir, "lib"))
+            self.copy(pattern="*.so*", dst="lib", src=join(self.build_dir, "lib"))
+            self.copy(pattern="*.dylib", dst="lib", src=join(self.build_dir, "lib"))
 
     def package_info(self):
         self.cpp_info.libs = ['usb-1.0']
         if self.settings.os == "Linux":
             self.cpp_info.libs.append("pthread")
-            if self.options.udev:
-                self.cpp_info.libs.append("udev")
+            self.cpp_info.libs.append("udev")
         elif self.settings.os == "Macos":
             self.cpp_info.libs.append("objc")
             self.cpp_info.libs.append("-Wl,-framework,IOKit")
