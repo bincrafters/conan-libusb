@@ -33,6 +33,10 @@ static void print_endpoint_comp(const struct libusb_ss_endpoint_companion_descri
 }
 
 static void print_endpoint(const struct libusb_endpoint_descriptor *endpoint)
+
+#ifdef _MSC_VER
+#define snprintf(buf,len, format,...) _snprintf_s(buf, len,len, format, __VA_ARGS__)
+#endif
 {
 	int i, ret;
 

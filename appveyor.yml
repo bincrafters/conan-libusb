@@ -1,0 +1,26 @@
+build: false
+environment:
+    PYTHON: "C:\\Python27"
+    PYTHON_VERSION: "2.7.8"
+    PYTHON_ARCH: "32"
+
+    CONAN_UPLOAD: 1
+    CONAN_REFERENCE: "libusb/1.0.21"
+    CONAN_USERNAME: "uilianries"
+    CONAN_CHANNEL: "ci"
+    CONAN_TOTAL_PAGES: 4
+    CONAN_STABLE_BRANCH_PATTERN: "release/*"
+    CONAN_VISUAL_VERSIONS: 11
+
+    matrix:
+        - CONAN_CURRENT_PAGE: 1
+        - CONAN_CURRENT_PAGE: 2
+        - CONAN_CURRENT_PAGE: 3
+        - CONAN_CURRENT_PAGE: 4
+
+install:
+  - set PATH=%PATH%;%PYTHON%/Scripts/;C:\cygwin\bin
+  - pip.exe install --upgrade conan conan_package_tools
+  - conan user
+test_script:
+  - python build.py

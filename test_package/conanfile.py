@@ -25,8 +25,12 @@ class TestLibUSBConan(ConanFile):
 
     def imports(self):
         self.copy(pattern="*.so*", dst="bin", src="lib")
+        self.copy(pattern="*.dll", dst="bin", src="bin")
 
     def test(self):
         cmake = CMake(self.settings)
         cmake.configure(self, source_dir=self.conanfile_directory, build_dir="./")
-        cmake.build(self, target="test")
+        if self.settings.compiler == "Visual Studio":
+            self.run("cd bin && conan-libusb-test.exe")
+        else:
+            cmake.build(self, target="test")
