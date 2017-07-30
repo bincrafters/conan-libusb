@@ -2,6 +2,8 @@
 
 # conan-libusb
 
+![Conan libusb](conan_libusb.png)
+
 # A cross-platform library to access USB devices
 
 [Conan.io](https://conan.io) package for [libusb](http://libusb.info/) project
