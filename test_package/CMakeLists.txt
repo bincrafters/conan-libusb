@@ -7,6 +7,10 @@ set(CMAKE_VERBOSE_MAKEFILE TRUE)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
+# Load libusb module ##########################################################
+include(${CMAKE_BINARY_DIR}/FindLibusb1.cmake)
+find_package(Libusb1 REQUIRED)
+
 # Source files #################################################################
 file(GLOB SOURCE_FILES src/*.c)
 

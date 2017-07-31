@@ -21,15 +21,15 @@ class LibUSBConan(ConanFile):
     name = "libusb"
     version = "1.0.21"
     release_name = "%s-%s" % (name, version)
-    generators = "cmake"
+    generators = "cmake", "txt"
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False] }
     default_options = "shared=True"
     url = "http://github.com/uilianries/conan-libusb"
     author = "Uilian Ries <uilianries@gmail.com>"
-    license = "LGPL-2.1"
+    license = "https://github.com/libusb/libusb/blob/master/COPYING"
     description = "A cross-platform library to access USB devices"
-    exports = ["CMakeLists.txt", "Findlibusb-1.0.cmake"]
+    exports = ["CMakeLists.txt", "FindLibusb1.cmake"]
     build_dir = mkdtemp(suffix=name)
 
     def source(self):
@@ -48,21 +48,22 @@ class LibUSBConan(ConanFile):
 
     def build(self):
         if self.settings.compiler == "Visual Studio":
-            shared = { "BUILD_SHARED_LIBS": self.options.shared }
-            cmake = CMake(self.settings)
-            cmake.configure(self, source_dir=self.release_name, defs=shared)
-            cmake.build(self)
+            cmake = CMake(self)
+            cmake.configure(source_dir=self.release_name)
+            cmake.build()
         else:
             env_build = AutoToolsBuildEnvironment(self)
             env_build.fpic = True
             with environment_append(env_build.vars):
                 with chdir(self.release_name):
-                    shared_option = "--disable-static" if self.options.shared else "--disable-shared"
+                    shared_option = "--disable-shared" if not self.options.shared else ""
                     self.run("./configure --prefix=%s %s" % (self.build_dir, shared_option))
                     self.run("make")
                     self.run("make install")
 
     def package(self):
+        self.copy("FindLibusb1.cmake", ".", ".")
+        self.copy("COPYING", src=self.release_name, dst=".", keep_path=False)
         if self.settings.compiler == "Visual Studio":
             self.copy(pattern="libusb.h", dst=join("include", "libusb-1.0"), src=join(self.release_name, "libusb"))
             self.copy(pattern="*.lib", dst="lib", keep_path=False)

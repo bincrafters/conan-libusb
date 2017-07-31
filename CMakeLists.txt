@@ -33,7 +33,8 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 	file(GLOB PLATFORM_FILES libusb/os/poll_windows.c
 	                         libusb/os/threads_windows.c
 							 libusb/os/windows_nt_common.c
-							 libusb/os/windows_winusb.c)
+							 libusb/os/windows_winusb.c
+						     libusb/os/windows_usbdk.c)
 elseif (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 	file(GLOB PLATFORM_FILES libusb/os/poll_posix.c
 							 libusb/os/threads_posix.c
@@ -48,8 +49,8 @@ endif()
 # Library list #################################################################
 find_package (Threads)
 set(TARGET_LIBRARIES "")
-if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")	
-	set(TARGET_LIBRARIES udev)	
+if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+	set(TARGET_LIBRARIES udev)
 elseif (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
 	set(TARGET_LIBRARIES objc)
 endif()
@@ -62,6 +63,6 @@ set_property(TARGET ${TARGET_NAME} PROPERTY C_STANDARD 99)
 # Install ######################################################################
 install(FILES libusb/libusb.h
     DESTINATION ${CMAKE_INSTALL_PREFIX}/include/${TARGET_NAME})
-		
+
 install(TARGETS ${TARGET_NAME}
         DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
