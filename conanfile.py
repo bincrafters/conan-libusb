@@ -29,7 +29,7 @@ class LibUSBConan(ConanFile):
     author = "Uilian Ries <uilianries@gmail.com>"
     license = "https://github.com/libusb/libusb/blob/master/COPYING"
     description = "A cross-platform library to access USB devices"
-    exports = ["CMakeLists.txt", "FindLibusb1.cmake"]
+    exports = ["CMakeLists.txt", "FindLIBUSB.cmake"]
     build_dir = mkdtemp(suffix=name)
 
     def source(self):
@@ -49,8 +49,12 @@ class LibUSBConan(ConanFile):
     def build(self):
         if self.settings.compiler == "Visual Studio":
             cmake = CMake(self)
+            cmake.definitions["WITH_STATIC"] = not self.options.shared or self.settings.compiler == "Visual Studio"
+            cmake.definitions["WITH_SHARED"] = self.options.shared
+            cmake.definitions["CMAKE_INSTALL_PREFIX"] = self.build_dir
             cmake.configure(source_dir=self.release_name)
             cmake.build()
+            cmake.install()
         else:
             env_build = AutoToolsBuildEnvironment(self)
             env_build.fpic = True
@@ -62,20 +66,19 @@ class LibUSBConan(ConanFile):
                     self.run("make install")
 
     def package(self):
-        self.copy("FindLibusb1.cmake", ".", ".")
+        self.copy("FindLIBUSB.cmake", ".", ".")
         self.copy("COPYING", src=self.release_name, dst=".", keep_path=False)
-        if self.settings.compiler == "Visual Studio":
-            self.copy(pattern="libusb.h", dst=join("include", "libusb-1.0"), src=join(self.release_name, "libusb"))
-            self.copy(pattern="*.lib", dst="lib", keep_path=False)
-            self.copy(pattern="*.dll", dst="bin", keep_path=False)
-        else:
-            self.copy(pattern="*.h", dst="include", src=join(self.build_dir, "include"))
-            self.copy(pattern="*.a", dst="lib", src=join(self.build_dir, "lib"))
-            self.copy(pattern="*.so*", dst="lib", src=join(self.build_dir, "lib"))
-            self.copy(pattern="*.dylib", dst="lib", src=join(self.build_dir, "lib"))
+        self.copy(pattern="*.h", dst="include", src=join(self.build_dir, "include"))
+        self.copy(pattern="*.lib", dst="lib", src=join(self.build_dir, "lib"), keep_path=False)
+        self.copy(pattern="*.lib", dst="lib", src=join(self.build_dir, "lib"), keep_path=False)
+        self.copy(pattern="*.a", dst="lib", src=join(self.build_dir, "lib"), keep_path=False)
+        self.copy(pattern="*.so*", dst="lib", src=join(self.build_dir, "lib"), keep_path=False)
+        self.copy(pattern="*.dylib", dst="lib", src=join(self.build_dir, "lib"), keep_path=False)
+        self.copy(pattern="*.dll", dst="bin", src=join(self.build_dir, "lib"), keep_path=False)
 
     def package_info(self):
-        self.cpp_info.libs = ['usb-1.0']
+        lib_name = 'libusb-1.0' if self.settings.os == "Windows" and self.settings.compiler == "Visual Studio" else 'usb-1.0'
+        self.cpp_info.libs.append(lib_name)
         if self.settings.os == "Linux":
             self.cpp_info.libs.append("pthread")
             self.cpp_info.libs.append("udev")

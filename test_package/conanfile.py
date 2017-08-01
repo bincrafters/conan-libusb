@@ -22,7 +22,6 @@ class TestLibUSBConan(ConanFile):
     def imports(self):
         self.copy(pattern="*.so*", dst="bin", src="lib")
         self.copy(pattern="*.dll", dst="bin", src="bin")
-        self.copy(pattern="FindLibusb1.cmake", dst=".", src=".")
 
     def test(self):
         cmake = CMake(self)
