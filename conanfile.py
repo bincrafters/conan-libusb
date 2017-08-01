@@ -3,7 +3,7 @@
 from shutil import copyfile
 from tempfile import mkdtemp
 from os import unlink
-from os.path import join
+from os import path
 from conans import ConanFile
 from conans import CMake
 from conans import AutoToolsBuildEnvironment
@@ -38,7 +38,7 @@ class LibUSBConan(ConanFile):
         check_md5(tar_name, "1da9ea3c27b3858fa85c5f4466003e44")
         unzip(tar_name)
         unlink(tar_name)
-        copyfile("CMakeLists.txt", join(self.release_name, "CMakeLists.txt"))
+        copyfile("CMakeLists.txt", path.join(self.release_name, "CMakeLists.txt"))
 
     def system_requirements(self):
         if self.settings.os == "Linux":
@@ -60,21 +60,22 @@ class LibUSBConan(ConanFile):
             env_build.fpic = True
             with environment_append(env_build.vars):
                 with chdir(self.release_name):
-                    shared_option = "--disable-shared" if not self.options.shared else ""
-                    self.run("./configure --prefix=%s %s" % (self.build_dir, shared_option))
-                    self.run("make")
-                    self.run("make install")
+                    configure_args = ["--prefix=/tmp/foo"]
+                    configure_args.append("--enable-shared" if self.options.shared else "--disable-shared")
+                    env_build.configure(configure_dir="./", args=configure_args, build=False, host=False, target=False)
+                    env_build.make(args=["all"])
+                    env_build.make(args=["install"])
 
     def package(self):
         self.copy("FindLIBUSB.cmake", ".", ".")
         self.copy("COPYING", src=self.release_name, dst=".", keep_path=False)
-        self.copy(pattern="*.h", dst="include", src=join(self.build_dir, "include"))
-        self.copy(pattern="*.lib", dst="lib", src=join(self.build_dir, "lib"), keep_path=False)
-        self.copy(pattern="*.lib", dst="lib", src=join(self.build_dir, "lib"), keep_path=False)
-        self.copy(pattern="*.a", dst="lib", src=join(self.build_dir, "lib"), keep_path=False)
-        self.copy(pattern="*.so*", dst="lib", src=join(self.build_dir, "lib"), keep_path=False)
-        self.copy(pattern="*.dylib", dst="lib", src=join(self.build_dir, "lib"), keep_path=False)
-        self.copy(pattern="*.dll", dst="bin", src=join(self.build_dir, "lib"), keep_path=False)
+        self.copy(pattern="*.h", dst="include", src=path.join(self.build_dir, "include"))
+        self.copy(pattern="*.lib", dst="lib", src=path.join(self.build_dir, "lib"), keep_path=False)
+        self.copy(pattern="*.lib", dst="lib", src=path.join(self.build_dir, "lib"), keep_path=False)
+        self.copy(pattern="*.a", dst="lib", src=path.join(self.build_dir, "lib"), keep_path=False)
+        self.copy(pattern="*.so*", dst="lib", src=path.join(self.build_dir, "lib"), keep_path=False)
+        self.copy(pattern="*.dylib", dst="lib", src=path.join(self.build_dir, "lib"), keep_path=False)
+        self.copy(pattern="*.dll", dst="bin", src=path.join(self.build_dir, "lib"), keep_path=False)
 
     def package_info(self):
         lib_name = 'libusb-1.0' if self.settings.os == "Windows" and self.settings.compiler == "Visual Studio" else 'usb-1.0'
