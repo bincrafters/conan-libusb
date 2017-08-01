@@ -60,8 +60,9 @@ class LibUSBConan(ConanFile):
             env_build.fpic = True
             with environment_append(env_build.vars):
                 with chdir(self.release_name):
-                    configure_args = ["--prefix=/tmp/foo"]
+                    configure_args = ["--prefix=%s" % self.build_dir]
                     configure_args.append("--enable-shared" if self.options.shared else "--disable-shared")
+                    configure_args.append("--enable-static" if not self.options.shared else "--disable-static")
                     env_build.configure(configure_dir="./", args=configure_args, build=False, host=False, target=False)
                     env_build.make(args=["all"])
                     env_build.make(args=["install"])
