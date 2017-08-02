@@ -61,7 +61,7 @@ class LibUSBConan(ConanFile):
                     configure_args.append('--enable-shared' if self.options.shared else '--disable-shared')
                     configure_args.append('--enable-static' if not self.options.shared else '--disable-static')
                     self._run_cmd("./configure %s" % ' '.join(configure_args))
-                    if self.settings.os == "Windows" and self.settings.compiler = "gcc":
+                    if self.settings.os == "Windows" and self.settings.compiler == "gcc":
                         new_build_folder = tools.unix_path(self.build_folder)
                         tools.replace_in_file(os.path.join(self.build_folder, release_name, "Makefile"), self.build_folder, new_build_folder)
                     self._run_cmd("make")
