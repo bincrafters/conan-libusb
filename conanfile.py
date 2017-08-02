@@ -72,8 +72,8 @@ class LibUSBConan(ConanFile):
                     configure_args.append('--enable-shared' if self.options.shared else '--disable-shared')
                     configure_args.append('--enable-static' if not self.options.shared else '--disable-static')
                     self._run_cmd("./configure %s" % ' '.join(configure_args))
-                    self.env_build.make(args=["all"])
-                    self.env_build.make(args=["install"])
+                    env_build.make(args=["all"])
+                    env_build.make(args=["install"])
 
     def package(self):
         self.copy("FindLIBUSB.cmake", ".", ".")
