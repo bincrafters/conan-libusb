@@ -13,6 +13,7 @@ from conans.tools import chdir
 from conans.tools import check_md5
 from conans.tools import SystemPackageTool
 from conans.tools import environment_append
+from conans.tools import run_in_windows_bash
 
 
 class LibUSBConan(ConanFile):
@@ -30,7 +31,7 @@ class LibUSBConan(ConanFile):
     license = "https://github.com/libusb/libusb/blob/master/COPYING"
     description = "A cross-platform library to access USB devices"
     exports = ["CMakeLists.txt", "FindLIBUSB.cmake"]
-    build_dir = mkdtemp(suffix=name)
+    install_dir = mkdtemp(suffix=name)
 
     def source(self):
         tar_name = "%s-%s.tar.gz" % (self.name, self.version)
@@ -47,11 +48,11 @@ class LibUSBConan(ConanFile):
             package_tool.install(packages="libudev-dev:%s" % arch, update=True)
 
     def build(self):
-        if self.settings.compiler == "Visual Studio":
+        if self.settings.os == "Windows":
             cmake = CMake(self)
             cmake.definitions["WITH_STATIC"] = not self.options.shared or self.settings.compiler == "Visual Studio"
             cmake.definitions["WITH_SHARED"] = self.options.shared
-            cmake.definitions["CMAKE_INSTALL_PREFIX"] = self.build_dir
+            cmake.definitions["CMAKE_INSTALL_PREFIX"] = self.install_dir
             cmake.configure(source_dir=self.release_name)
             cmake.build()
             cmake.install()
@@ -60,23 +61,23 @@ class LibUSBConan(ConanFile):
             env_build.fpic = True
             with environment_append(env_build.vars):
                 with chdir(self.release_name):
-                    configure_args = ["--prefix=%s" % self.build_dir]
-                    configure_args.append("--enable-shared" if self.options.shared else "--disable-shared")
-                    configure_args.append("--enable-static" if not self.options.shared else "--disable-static")
-                    env_build.configure(configure_dir="./", args=configure_args, build=False, host=False, target=False)
+                    configure_args = ['--prefix=%s' % self.install_dir]
+                    configure_args.append('--enable-shared' if self.options.shared else '--disable-shared')
+                    configure_args.append('--enable-static' if not self.options.shared else '--disable-static')
+                    env_build.configure(args=configure_args)
                     env_build.make(args=["all"])
                     env_build.make(args=["install"])
 
     def package(self):
         self.copy("FindLIBUSB.cmake", ".", ".")
         self.copy("COPYING", src=self.release_name, dst=".", keep_path=False)
-        self.copy(pattern="*.h", dst="include", src=path.join(self.build_dir, "include"))
-        self.copy(pattern="*.lib", dst="lib", src=path.join(self.build_dir, "lib"), keep_path=False)
-        self.copy(pattern="*.lib", dst="lib", src=path.join(self.build_dir, "lib"), keep_path=False)
-        self.copy(pattern="*.a", dst="lib", src=path.join(self.build_dir, "lib"), keep_path=False)
-        self.copy(pattern="*.so*", dst="lib", src=path.join(self.build_dir, "lib"), keep_path=False)
-        self.copy(pattern="*.dylib", dst="lib", src=path.join(self.build_dir, "lib"), keep_path=False)
-        self.copy(pattern="*.dll", dst="bin", src=path.join(self.build_dir, "lib"), keep_path=False)
+        self.copy(pattern="*.h", dst="include", src=path.join(self.install_dir, "include"))
+        self.copy(pattern="*.lib", dst="lib", src=path.join(self.install_dir, "lib"), keep_path=False)
+        self.copy(pattern="*.lib", dst="lib", src=path.join(self.install_dir, "lib"), keep_path=False)
+        self.copy(pattern="*.a", dst="lib", src=path.join(self.install_dir, "lib"), keep_path=False)
+        self.copy(pattern="*.so*", dst="lib", src=path.join(self.install_dir, "lib"), keep_path=False)
+        self.copy(pattern="*.dylib", dst="lib", src=path.join(self.install_dir, "lib"), keep_path=False)
+        self.copy(pattern="*.dll", dst="bin", src=path.join(self.install_dir, "lib"), keep_path=False)
 
     def package_info(self):
         lib_name = 'libusb-1.0' if self.settings.os == "Windows" and self.settings.compiler == "Visual Studio" else 'usb-1.0'
