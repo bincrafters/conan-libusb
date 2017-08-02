@@ -49,7 +49,7 @@ class LibUSBConan(ConanFile):
 
     def _run_cmd(self, command):
         if self.settings.os == "Windows":
-            command = command.replace('\\', '\\\\')
+            command = command.replace('\\', '/')
             run_in_windows_bash(self, command)
         else:
             self.run(command)
