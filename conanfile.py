@@ -47,8 +47,15 @@ class LibUSBConan(ConanFile):
             arch = "i386" if self.settings.arch == "x86" else "amd64"
             package_tool.install(packages="libudev-dev:%s" % arch, update=True)
 
-    def build(self):
+    def _run_cmd(self, command):
         if self.settings.os == "Windows":
+            command = command.replace('\\', '\\\\')
+            run_in_windows_bash(self, command)
+        else:
+            self.run(command)
+
+    def build(self):
+        if self.settings.os == "Windows" and self.settings.compiler == "Visual Studio":
             cmake = CMake(self)
             cmake.definitions["WITH_STATIC"] = not self.options.shared or self.settings.compiler == "Visual Studio"
             cmake.definitions["WITH_SHARED"] = self.options.shared
@@ -64,7 +71,7 @@ class LibUSBConan(ConanFile):
                     configure_args = ['--prefix=%s' % self.install_dir]
                     configure_args.append('--enable-shared' if self.options.shared else '--disable-shared')
                     configure_args.append('--enable-static' if not self.options.shared else '--disable-static')
-                    env_build.configure(args=configure_args)
+                    self._run_cmd("./configure %s" % ' '.join(configure_args))
                     env_build.make(args=["all"])
                     env_build.make(args=["install"])
 
