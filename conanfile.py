@@ -39,8 +39,7 @@ class LibUSBConan(ConanFile):
 
     def _run_cmd(self, command):
         if self.settings.os == "Windows":
-            command = command.replace('\\', '/')
-            tools.run_in_windows_bash(self, command)
+            tools.run_in_windows_bash(self, tools.unix_path(command))
         else:
             self.run(command)
 
@@ -60,8 +59,10 @@ class LibUSBConan(ConanFile):
                 configure_args = ['--prefix=%s' % self.install_dir]
                 configure_args.append('--enable-shared' if self.options.shared else '--disable-shared')
                 configure_args.append('--enable-static' if not self.options.shared else '--disable-static')
+                if self.settings.os == "Windows" and self.settings.compiler == "gcc":
+                    configure_args.append('--srcdir=%s' % tools.unix_path(os.path.join(self.build_folder, self.release_name)))
                 self._run_cmd("cd %s && ./configure %s" % (self.release_name, ' '.join(configure_args)))
-                self._run_cmd("cd %s && make all" % self.release_name)
+                self._run_cmd("cd %s && make" % self.release_name)
                 self._run_cmd("cd %s && make install" % self.release_name)
 
     def package(self):
