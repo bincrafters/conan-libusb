@@ -56,14 +56,16 @@ class LibUSBConan(ConanFile):
             env_build = AutoToolsBuildEnvironment(self)
             env_build.fpic = True
             with tools.environment_append(env_build.vars):
-                configure_args = ['--prefix=%s' % self.install_dir]
-                configure_args.append('--enable-shared' if self.options.shared else '--disable-shared')
-                configure_args.append('--enable-static' if not self.options.shared else '--disable-static')
-                if self.settings.os == "Windows" and self.settings.compiler == "gcc":
-                    configure_args.append('--srcdir=%s' % tools.unix_path(os.path.join(self.build_folder, self.release_name)))
-                self._run_cmd("cd %s && ./configure %s" % (self.release_name, ' '.join(configure_args)))
-                self._run_cmd("cd %s && make" % self.release_name)
-                self._run_cmd("cd %s && make install" % self.release_name)
+                with tools.chdir(self.release_name):
+                    configure_args = ['--prefix=%s' % self.install_dir]
+                    configure_args.append('--enable-shared' if self.options.shared else '--disable-shared')
+                    configure_args.append('--enable-static' if not self.options.shared else '--disable-static')
+                    self._run_cmd("./configure %s" % ' '.join(configure_args))
+                    if self.settings.os == "Windows" and self.settings.compiler = "gcc":
+                        new_build_folder = tools.unix_path(self.build_folder)
+                        tools.replace_in_file(os.path.join(self.build_folder, release_name, "Makefile"), self.build_folder, new_build_folder)
+                    self._run_cmd("make")
+                    self._run_cmd("make install")
 
     def package(self):
         self.copy("FindLIBUSB.cmake", ".", ".")
