@@ -63,7 +63,7 @@ class LibUSBConan(ConanFile):
                     self._run_cmd("./configure %s" % ' '.join(configure_args))
                     if self.settings.os == "Windows" and self.settings.compiler == "gcc":
                         new_build_folder = tools.unix_path(self.build_folder)
-                        tools.replace_in_file(os.path.join(self.build_folder, release_name, "Makefile"), self.build_folder, new_build_folder)
+                        tools.replace_in_file(os.path.join(self.build_folder, self.release_name, "Makefile"), self.build_folder, new_build_folder)
                     self._run_cmd("make")
                     self._run_cmd("make install")
 
