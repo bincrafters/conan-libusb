@@ -55,8 +55,8 @@ class LibUSBConan(ConanFile):
         else:
             env_build = AutoToolsBuildEnvironment(self)
             env_build.fpic = True
-            unix_environment = {}
             # Solve Windows path on MingW
+            unix_environment = {}
             for key, value in env_build.vars.items():
                 unix_environment[key] = value.replace("\\", "/")
             with tools.environment_append(unix_environment):
