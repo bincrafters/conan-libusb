@@ -55,15 +55,21 @@ class LibUSBConan(ConanFile):
         else:
             env_build = AutoToolsBuildEnvironment(self)
             env_build.fpic = True
-            with tools.environment_append(env_build.vars):
+            unix_environment = {}
+            # Solve Windows path on MingW
+            for key, value in env_build.vars.items():
+                unix_environment[key] = value.replace("\\", "/")
+            with tools.environment_append(unix_environment):
+                configure_args = ['--prefix=%s' % self.install_dir]
+                configure_args.append('--enable-shared' if self.options.shared else '--disable-shared')
+                configure_args.append('--enable-static' if not self.options.shared else '--disable-static')
+                if self.settings.os == "Windows" and self.settings.compiler == "gcc" and self.settings.arch == "x86_64":
+                    configure_args.append('--host=x86_64-w64-mingw32')
+                if self.settings.os == "Windows" and self.settings.compiler == "gcc" and self.settings.arch == "x86":
+                    configure_args.append('--build=i686-w64-mingw32')
+                    configure_args.append('--host=i686-w64-mingw32')
                 with tools.chdir(self.release_name):
-                    configure_args = ['--prefix=%s' % self.install_dir]
-                    configure_args.append('--enable-shared' if self.options.shared else '--disable-shared')
-                    configure_args.append('--enable-static' if not self.options.shared else '--disable-static')
                     self._run_cmd("./configure %s" % ' '.join(configure_args))
-                    if self.settings.os == "Windows" and self.settings.compiler == "gcc":
-                        new_build_folder = tools.unix_path(self.build_folder)
-                        tools.replace_in_file(os.path.join(self.build_folder, self.release_name, "Makefile"), self.build_folder, new_build_folder)
                     self._run_cmd("make")
                     self._run_cmd("make install")
 
@@ -71,12 +77,15 @@ class LibUSBConan(ConanFile):
         self.copy("FindLIBUSB.cmake", ".", ".")
         self.copy("COPYING", src=self.release_name, dst=".", keep_path=False)
         self.copy(pattern="*.h", dst="include", src=os.path.join(self.install_dir, "include"))
+        self.copy(pattern="*.pc", dst="lib", src=os.path.join(self.install_dir, "lib", "pkgconfig"))
         self.copy(pattern="*.lib", dst="lib", src=os.path.join(self.install_dir, "lib"), keep_path=False)
         self.copy(pattern="*.lib", dst="lib", src=os.path.join(self.install_dir, "lib"), keep_path=False)
         self.copy(pattern="*.a", dst="lib", src=os.path.join(self.install_dir, "lib"), keep_path=False)
+        self.copy(pattern="*.la", dst="lib", src=os.path.join(self.install_dir, "lib"), keep_path=False)
         self.copy(pattern="*.so*", dst="lib", src=os.path.join(self.install_dir, "lib"), keep_path=False)
         self.copy(pattern="*.dylib", dst="lib", src=os.path.join(self.install_dir, "lib"), keep_path=False)
         self.copy(pattern="*.dll", dst="bin", src=os.path.join(self.install_dir, "lib"), keep_path=False)
+        self.copy(pattern="*.dll", dst="bin", src=os.path.join(self.install_dir, "bin"), keep_path=False)
 
     def package_info(self):
         lib_name = 'libusb-1.0' if self.settings.os == "Windows" and self.settings.compiler == "Visual Studio" else 'usb-1.0'
