@@ -8,6 +8,10 @@ set(VERSION_MAJOR 1)
 set(VERSION_MINOR 0)
 set(VERSION_PATCH 21)
 
+# Build options ################################################################
+option(WITH_SHARED "Build shared library" ON)
+option(WITH_STATIC "Build static library" ON)
+
 # Project defines ##############################################################
 set(TARGET_NAME "${CMAKE_PROJECT_NAME}-${VERSION_MAJOR}.${VERSION_MINOR}")
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
