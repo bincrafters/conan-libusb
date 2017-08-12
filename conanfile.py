@@ -60,6 +60,8 @@ class LibUSBConan(ConanFile):
             unix_environment[key] = value.replace("\\", "/")
         with tools.environment_append(unix_environment):
             configure_args = ['--prefix=%s' % self.install_dir]
+            configure_args.append('--enable-shared' if self.options.shared else '--disable-shared')
+            configure_args.append('--enable-static' if not self.options.shared else '--disable-static')
             if self.settings.arch == "x86_64":
                 configure_args.append('--host=x86_64-w64-mingw32')
             if self.settings.arch == "x86":
@@ -135,8 +137,9 @@ class LibUSBConan(ConanFile):
         self.copy(pattern="*.h", dst="include", src=os.path.join(self.install_dir, "include"))
         if self.options.shared:
             self.copy(pattern="*.dll", dst="bin", src=os.path.join(self.install_dir, "bin"), keep_path=False)
+            self.copy(pattern="*.dll.a", dst="lib", src=os.path.join(self.install_dir, "lib"), keep_path=False)
         else:
-            self.copy(pattern="*.a", dst="lib", src=os.path.join(self.install_dir, "lib"), keep_path=False)
+            self.copy(pattern="libusb-1.0.a", dst="lib", src=os.path.join(self.install_dir, "lib"), keep_path=False)
             self.copy(pattern="*.la", dst="lib", src=os.path.join(self.install_dir, "lib"), keep_path=False)
 
     def package(self):
