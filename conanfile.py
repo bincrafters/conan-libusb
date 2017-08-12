@@ -1,6 +1,5 @@
 """Conan receipt package for USB Library 1.0.21
 """
-import shutil
 import tempfile
 import os
 from conans import ConanFile, VisualStudioBuildEnvironment, AutoToolsBuildEnvironment, tools
@@ -19,7 +18,6 @@ class LibUSBConan(ConanFile):
     author = "Uilian Ries <uilianries@gmail.com>"
     license = "https://github.com/libusb/libusb/blob/master/COPYING"
     description = "A cross-platform library to access USB devices"
-    exports = ["FindLIBUSB.cmake"]
     release_name = "%s-%s" % (name, version)
     install_dir = tempfile.mkdtemp(suffix=name)
 
@@ -42,7 +40,12 @@ class LibUSBConan(ConanFile):
         env_build = VisualStudioBuildEnvironment(self)
         with tools.environment_append(env_build.vars):
             with tools.chdir(self.release_name):
-                solution_file = os.path.join("msvc", "libusb_2015.sln")
+                solution_file = "libusb_2015.sln"
+                if self.settings.compiler.version == "12":
+                    solution_file = "libusb_2013.sln"
+                elif self.settings.compiler.version == "11":
+                    solution_file = "libusb_2012.sln"
+                solution_file = os.path.join("msvc", solution_file)
                 build_command = tools.build_sln_command(self.settings, solution_file)
                 if self.settings.arch == "x86":
                     build_command = build_command.replace("x86", "Win32")
@@ -115,10 +118,9 @@ class LibUSBConan(ConanFile):
             self.copy(pattern="*.a", dst="lib", src=os.path.join(self.install_dir, "lib"), keep_path=False)
 
     def _package_visual_studio(self):
-        self.copy("FindLIBUSB.cmake", ".", ".")
         self.copy(pattern="libusb.h", dst=os.path.join("include", "libusb-1.0"), src=os.path.join(self.release_name, "libusb"), keep_path=False)
         arch = "x64" if self.settings.arch == "x86_64" else "Win32"
-        source_dir = os.path.join(self.release_name, arch, str(self.settings.build_type), "dll" if self.options.shared else "static")
+        source_dir = os.path.join(self.release_name, arch, str(self.settings.build_type), "dll" if self.options.shared else "lib")
         if self.options.shared:
             self.copy(pattern="libusb-1.0.dll", dst="bin", src=source_dir, keep_path=False)
             self.copy(pattern="libusb-1.0.lib", dst="lib", src=source_dir, keep_path=False)
