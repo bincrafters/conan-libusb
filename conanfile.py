@@ -19,13 +19,12 @@ class LibUSBConan(ConanFile):
     author = "Uilian Ries <uilianries@gmail.com>"
     license = "https://github.com/libusb/libusb/blob/master/COPYING"
     description = "A cross-platform library to access USB devices"
-    exports_sources = ["FindLIBUSB.cmake"]
+    exports = ["FindLIBUSB.cmake"]
     release_name = "%s-%s" % (name, version)
     install_dir = tempfile.mkdtemp(suffix=name)
 
     def source(self):
         tools.get("https://github.com/libusb/libusb/releases/download/v%s/%s.tar.bz2" % (self.version, self.release_name))
-        shutil.copyfile("CMakeLists.txt", os.path.join(self.release_name, "CMakeLists.txt"))
 
     def config_options(self):
         if self.settings.os != "Linux":
