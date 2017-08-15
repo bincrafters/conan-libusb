@@ -29,12 +29,24 @@ class LibUSBConan(ConanFile):
             del self.options.enable_udev
 
     def system_requirements(self):
-        # TODO: libudev could be moved to a package
         if self.settings.os == "Linux":
             if self.options.enable_udev:
                 package_tool = tools.SystemPackageTool()
-                arch = "i386" if self.settings.arch == "x86" else "amd64"
-                package_tool.install(packages="libudev-dev:%s" % arch, update=True)
+                libudev_name = ""
+                os_info = tools.OSInfo()
+                if os_info.with_apt:
+                    libudev_name = "libudev-dev"
+                    if tools.detected_architecture() == "x86_64" and str(self.settings.arch) == "x86":
+                        libudev_name += ":i386"
+                    elif "x86" in tools.detected_architecture() and "arm" in str(self.settings.arch):
+                        libudev_name += ":armhf"
+                elif os_info.with_yum:
+                    libudev_name = "libudev-devel"
+                    if tools.detected_architecture() == "x86_64" and str(self.settings.arch) == "x86":
+                        libudev_name += ".i686"
+                else:
+                    raise Exception("Could not install libudev: Undefined package name for platform.")
+                package_tool.install(packages=libudev_name, update=True)
 
     def _build_visual_studio(self):
         env_build = VisualStudioBuildEnvironment(self)
