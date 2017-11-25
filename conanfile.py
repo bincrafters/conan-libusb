@@ -13,7 +13,7 @@ class LibUSBConan(ConanFile):
     generators = "cmake", "txt"
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "enable_udev": [True, False]}
-    default_options = "shared=True", "enable_udev=True"
+    default_options = "shared=False", "enable_udev=True"
     url = "http://github.com/uilianries/conan-libusb"
     author = "Uilian Ries <uilianries@gmail.com>"
     license = "https://github.com/libusb/libusb/blob/master/COPYING"
@@ -166,7 +166,7 @@ class LibUSBConan(ConanFile):
             self._package_mingw()
 
     def package_info(self):
-        self.cpp_info.libs = self.collect_libs()
+        self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
             self.cpp_info.libs.append("pthread")
             if self.options.enable_udev:

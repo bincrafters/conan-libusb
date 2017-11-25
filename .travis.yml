@@ -1,9 +1,3 @@
-
-env:
-   global:
-     - CONAN_REFERENCE: "libusb/1.0.21"
-     - CONAN_STABLE_BRANCH_PATTERN: "release/*"
-
 linux: &linux
    os: linux
    sudo: required
