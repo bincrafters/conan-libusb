@@ -1,56 +1,51 @@
-[![Build Status](https://travis-ci.org/bincrafters/conan-libusb.svg?branch=release/1.0.21)](https://travis-ci.org/bincrafters/conan-libusb)
-[![Build status](https://ci.appveyor.com/api/projects/status/redftqwgxxssmtwf/branch/stable/1.0.21?svg=true)](https://ci.appveyor.com/project/BinCrafters/conan-libusb/branch/stable/1.0.21)
-[![License: LGPL v2.1](https://img.shields.io/badge/License-LGPL%20v2.1-blue.svg)](http://www.gnu.org/licenses/lgpl-2.1)
-[![Download](https://api.bintray.com/packages/bincrafters/publi-conan/libpcap%3Abincrafters/images/download.svg?version=1.0.21%3Astable)](https://bintray.com/bincrafters/conan/libpcap%3Abincrafters/1.8.1%3Astable/link)
+# Conan libusb
 
-# conan-libusb
+## Conan package recipe for [libsub](https://github.com/libusb/libusb)
 
-![Conan libusb](conan_libusb.png)
+![logo](logo.png)
 
-# A cross-platform library to access USB devices
+## Package Status
 
-[Conan.io](https://conan.io) package for [libusb](http://libusb.info/) project
+| Bintray | Appveyor | Travis |
+|---------|-----------|--------|
+| [![Download](https://api.bintray.com/packages/bincrafters/publi-conan/libpcap%3Abincrafters/images/download.svg?version=1.0.21%3Astable)](https://bintray.com/bincrafters/conan/libpcap%3Abincrafters/1.8.1%3Astable/link) | [![Build status](https://ci.appveyor.com/api/projects/status/redftqwgxxssmtwf/branch/stable/1.0.21?svg=true)](https://ci.appveyor.com/project/BinCrafters/conan-libusb/branch/stable/1.0.21) | [![Build Status](https://travis-ci.org/bincrafters/conan-libusb.svg?branch=release/1.0.21)](https://travis-ci.org/bincrafters/conan-libusb) |
 
-The packages generated with this **conanfile** can be found in [Bintray](https://bintray.com/bincrafters/public-conan/libusb%3Abincrafters).
+## Conan.io Information
 
-## Build packages
+Bincrafters packages can be found in the following public Conan repository:
 
-Download conan client from [Conan.io](https://conan.io) and run:
+[Bincrafters Public Conan Repository on Bintray](https://bintray.com/bincrafters/public-conan)
 
-    $ python build.py
+*Note: You can click the "Set Me Up" button on the Bintray page above for instructions on using packages from this repository.*
 
-If your are in Windows you should run it from a VisualStudio console in order to get "mc.exe" in path.
+## Issues
 
-## Upload packages to server
+If you wish to report an issue or make a request for a Bincrafters package, please do so here:  
 
-    $ conan upload libusb/1.0.21@bincrafters/stable --all
+[Bincrafters Community Issues](https://github.com/bincrafters/community/issues)
 
-## Reuse the packages
+## General Information
 
-### Basic setup
+This GIT repository is managed by the Bincrafters team and holds files related to Conan.io.  For detailed information about Bincrafters and Conan.io, please visit the following resources:
 
-    $ conan install libusb/1.0.21@bincrafters/stable
+[Bincrafters Wiki - Common README](https://github.com/bincrafters/community/wiki/Common-README.md)
 
-### Project setup
+[Bincrafters Technical Documentation](http://bincrafters.readthedocs.io/en/latest/)
 
-If you handle multiple dependencies in your project is better to add a *conanfile.txt*
+[Bincrafters Blog](https://bincrafters.github.io)
 
-    [requires]
-    libusb/1.0.21@bincrafters/stable
+## License Information
 
-    [options]
-    libusb:shared=True # False
-    enable_udev=True # False
+Bincrafters packages are hosted on [Bintray](https://bintray.com) and contain Open-Source software which is licensed by the software's maintainers and NOT Bincrafters.  For each Open-Source package published by Bincrafters, the packaging process obtains the required license files along with the original source files from the maintainer, and includes these license files in the generated Conan packages.  
 
-    [generators]
-    txt
-    cmake
+The contents of this GIT repository are completely separate from the software being packaged and therefor licensed separately.  The license for all files contained in this GIT repository are defined in the [LICENSE.md](LICENSE.md) file in this repository.  The licenses included with all Conan packages published by Bincrafters can be found in the Conan package directories in the following locations, relative to the Conan Cache root (`~/.conan` by default):
 
-Complete the installation of requirements for your project running:</small></span>
+### License(s) for packaged software:
 
-    conan install .
+    ~/.conan/data/<pkg_name>/<pkg_version>/bincrafters/package/<random_package_id>/license/<LICENSE_FILES_HERE>
 
-Project setup installs the library (and all his dependencies) and generates the files *conanbuildinfo.txt* and *conanbuildinfo.cmake* with all the paths and variables that you need to link with your dependencies.
+*Note :   The most common filenames for OSS licenses are `LICENSE` AND `COPYING` without file extensions.*
 
-### License
-[LGPL-2.1](LICENSE)
+### License for Bincrafters recipe:
+
+    ~/.conan/data/<pkg_name>/<pkg_version>/bincrafters/export/LICENSE.md
