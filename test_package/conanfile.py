@@ -10,7 +10,7 @@ from conans import ConanFile, CMake, tools, RunEnvironment
 class TestLibUSBConan(ConanFile):
     """Build test using target package and execute all tests
     """
-    settings = "os", "compiler", "build_type", "arch", "os_build", "arch_build"
+    settings = "os", "compiler", "build_type", "arch"
     generators = "cmake"
 
     def build(self):

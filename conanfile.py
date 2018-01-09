@@ -12,7 +12,7 @@ class LibUSBConan(ConanFile):
     """
     name = "libusb"
     version = "1.0.21"
-    settings = "os", "compiler", "build_type", "arch", "os_build", "arch_build"
+    settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "enable_udev": [True, False]}
     default_options = "shared=False", "enable_udev=True"
     homepage = "https://github.com/libusb/libusb"
@@ -42,13 +42,13 @@ class LibUSBConan(ConanFile):
                 os_info = tools.OSInfo()
                 if os_info.with_apt:
                     libudev_name = "libudev-dev"
-                    if self.settings.arch == "x86" and self.settings.arch_build == "x86_64":
+                    if tools.detected_architecture() == "x86_64" and str(self.settings.arch) == "x86":
                         libudev_name += ":i386"
                     elif "x86" in tools.detected_architecture() and "arm" in str(self.settings.arch):
                         libudev_name += ":armhf"
                 elif os_info.with_yum:
                     libudev_name = "libudev-devel"
-                    if self.settings.arch == "x86" and self.settings.arch_build == "x86_64":
+                    if tools.detected_architecture() == "x86_64" and str(self.settings.arch) == "x86":
                         libudev_name += ".i686"
                 else:
                     raise Exception("Could not install libudev: Undefined package name for platform.")
@@ -65,7 +65,7 @@ class LibUSBConan(ConanFile):
                     solution_file = "libusb_2012.sln"
                 solution_file = os.path.join("msvc", solution_file)
                 build_command = tools.build_sln_command(self.settings, solution_file)
-                if self.settings.arch == "x86" and self.settings.arch_build == "x86_64":
+                if self.settings.arch == "x86":
                     build_command = build_command.replace("x86", "Win32")
                 command = "%s && %s" % (tools.vcvars_command(self.settings), build_command)
                 self.run(command)
@@ -82,7 +82,7 @@ class LibUSBConan(ConanFile):
             configure_args.append('--enable-static' if not self.options.shared else '--disable-static')
             if self.settings.arch == "x86_64":
                 configure_args.append('--host=x86_64-w64-mingw32')
-            if self.settings.arch == "x86" and self.settings.arch_build == "x86_64":
+            if self.settings.arch == "x86":
                 configure_args.append('--build=i686-w64-mingw32')
                 configure_args.append('--host=i686-w64-mingw32')
             with tools.chdir(self.source_subfolder):
