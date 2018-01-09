@@ -1,15 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""Receipt validation for libusb-1.0.21
-"""
-import os
 from conans import ConanFile, CMake, tools, RunEnvironment
+import os
 
 
-class TestLibUSBConan(ConanFile):
-    """Build test using target package and execute all tests
-    """
+class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake"
 

@@ -1,6 +1,6 @@
 # Conan libusb
 
-## Conan package recipe for [libsub](https://github.com/libusb/libusb)
+## Conan package recipe for [libusb](https://github.com/libusb/libusb)
 
 ![logo](logo.png)
 
@@ -8,7 +8,7 @@
 
 | Bintray | Appveyor | Travis |
 |---------|-----------|--------|
-| [![Download](https://api.bintray.com/packages/bincrafters/publi-conan/libpcap%3Abincrafters/images/download.svg?version=1.0.21%3Astable)](https://bintray.com/bincrafters/conan/libpcap%3Abincrafters/1.8.1%3Astable/link) | [![Build status](https://ci.appveyor.com/api/projects/status/redftqwgxxssmtwf/branch/stable/1.0.21?svg=true)](https://ci.appveyor.com/project/BinCrafters/conan-libusb/branch/stable/1.0.21) | [![Build Status](https://travis-ci.org/bincrafters/conan-libusb.svg?branch=release/1.0.21)](https://travis-ci.org/bincrafters/conan-libusb) |
+| [![Download](https://api.bintray.com/packages/bincrafters/public-conan/libpcap%3Abincrafters/images/download.svg?version=1.0.21%3Astable)](https://bintray.com/bincrafters/conan/libpcap%3Abincrafters/1.8.1%3Astable/link) | [![Build status](https://ci.appveyor.com/api/projects/status/redftqwgxxssmtwf/branch/stable/1.0.21?svg=true)](https://ci.appveyor.com/project/BinCrafters/conan-libusb/branch/stable/1.0.21) | [![Build Status](https://travis-ci.org/bincrafters/conan-libusb.svg?branch=release/1.0.21)](https://travis-ci.org/bincrafters/conan-libusb) |
 
 ## Conan.io Information
 
@@ -42,10 +42,10 @@ The contents of this GIT repository are completely separate from the software be
 
 ### License(s) for packaged software:
 
-    ~/.conan/data/<pkg_name>/<pkg_version>/bincrafters/package/<random_package_id>/license/<LICENSE_FILES_HERE>
+    ~/.conan/data/libsub/1.0.21/bincrafters/package/<random_package_id>/licenses/COPYING
 
 *Note :   The most common filenames for OSS licenses are `LICENSE` AND `COPYING` without file extensions.*
 
 ### License for Bincrafters recipe:
 
-    ~/.conan/data/<pkg_name>/<pkg_version>/bincrafters/export/LICENSE.md
+    ~/.conan/data/libsub/1.0.21/bincrafters/export/LICENSE.md
