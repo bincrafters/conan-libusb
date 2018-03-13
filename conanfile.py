@@ -65,7 +65,7 @@ class LibUSBConan(ConanFile):
                 elif self.settings.compiler.version == "11":
                     solution_file = "libusb_2012.sln"
                 solution_file = os.path.join("msvc", solution_file)
-                build_command = tools.build_sln_command(self.settings, solution_file)
+                build_command = tools.build_sln_command(self.settings, solution_file, upgrade_project=False)
                 if self.settings.arch == "x86":
                     build_command = build_command.replace("x86", "Win32")
                 command = "%s && %s" % (tools.vcvars_command(self.settings), build_command)
@@ -74,10 +74,7 @@ class LibUSBConan(ConanFile):
     def _build_mingw(self):
         env_build = AutoToolsBuildEnvironment(self)
         env_build.fpic = True
-        unix_environment = {}
-        for key, value in env_build.vars.items():
-            unix_environment[key] = value.replace("\\", "/")
-        with tools.environment_append(unix_environment):
+        with tools.environment_append(env_build.vars):
             configure_args = ['--prefix="%s"' % self.package_folder]
             configure_args.append('--enable-shared' if self.options.shared else '--disable-shared')
             configure_args.append('--enable-static' if not self.options.shared else '--disable-static')
