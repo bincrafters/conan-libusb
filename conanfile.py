@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""Conan receipt package for USB Library 1.0.21
+"""Conan receipt package for USB Library
 """
 import os
 from conans import ConanFile, VisualStudioBuildEnvironment, AutoToolsBuildEnvironment, tools
@@ -21,6 +21,7 @@ class LibUSBConan(ConanFile):
     license = "https://github.com/libusb/libusb/blob/master/COPYING"
     description = "A cross-platform library to access USB devices"
     source_subfolder = "source_subfolder"
+    exports = ["LICENSE.md"]
 
     def source(self):
         release_name = "%s-%s" % (self.name, self.version)
