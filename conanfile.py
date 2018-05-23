@@ -13,12 +13,12 @@ class LibUSBConan(ConanFile):
     name = "libusb"
     version = "1.0.21"
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False], "enable_udev": [True, False]}
-    default_options = "shared=False", "enable_udev=True"
+    options = {"shared": [True, False], "enable_udev": [True, False], "fPIC": [True, False]}
+    default_options = "shared=False", "enable_udev=True", "fPIC=True"
     homepage = "https://github.com/libusb/libusb"
     url = "http://github.com/bincrafters/conan-libusb"
     author = "Bincrafters <bincrafters@gmail.com>"
-    license = "https://github.com/libusb/libusb/blob/master/COPYING"
+    license = "GPL-2"
     description = "A cross-platform library to access USB devices"
     source_subfolder = "source_subfolder"
     exports = ["LICENSE.md"]
@@ -34,6 +34,8 @@ class LibUSBConan(ConanFile):
     def config_options(self):
         if self.settings.os != "Linux":
             del self.options.enable_udev
+        if self.settings.os == "Windows":
+            del self.options.fPIC
 
     def system_requirements(self):
         if self.settings.os == "Linux":
@@ -73,7 +75,6 @@ class LibUSBConan(ConanFile):
 
     def _build_mingw(self):
         env_build = AutoToolsBuildEnvironment(self)
-        env_build.fpic = True
         with tools.environment_append(env_build.vars):
             configure_args = ['--prefix="%s"' % self.package_folder]
             configure_args.append('--enable-shared' if self.options.shared else '--disable-shared')
@@ -90,7 +91,7 @@ class LibUSBConan(ConanFile):
 
     def _build_macos(self):
         env_build = AutoToolsBuildEnvironment(self)
-        env_build.fpic = True
+        env_build.fpic = self.options.fPIC
         with tools.environment_append(env_build.vars):
             configure_args = ['--prefix=%s' % self.package_folder]
             with tools.chdir(self.source_subfolder):
@@ -100,7 +101,7 @@ class LibUSBConan(ConanFile):
 
     def _build_linux(self):
         env_build = AutoToolsBuildEnvironment(self)
-        env_build.fpic = True
+        env_build.fpic = self.options.fPIC
         with tools.environment_append(env_build.vars):
             configure_args = ['--prefix=%s' % self.package_folder]
             configure_args.append('--enable-udev' if self.options.enable_udev else '--disable-udev')
