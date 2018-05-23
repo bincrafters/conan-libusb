@@ -4,7 +4,7 @@
 """Conan receipt package for USB Library
 """
 import os
-from conans import ConanFile, VisualStudioBuildEnvironment, AutoToolsBuildEnvironment, tools
+from conans import ConanFile, AutoToolsBuildEnvironment, tools, MSBuild
 
 
 class LibUSBConan(ConanFile):
@@ -58,20 +58,16 @@ class LibUSBConan(ConanFile):
                 package_tool.install(packages=libudev_name, update=True)
 
     def _build_visual_studio(self):
-        env_build = VisualStudioBuildEnvironment(self)
-        with tools.environment_append(env_build.vars):
-            with tools.chdir(self.source_subfolder):
-                solution_file = "libusb_2015.sln"
-                if self.settings.compiler.version == "12":
-                    solution_file = "libusb_2013.sln"
-                elif self.settings.compiler.version == "11":
-                    solution_file = "libusb_2012.sln"
-                solution_file = os.path.join("msvc", solution_file)
-                build_command = tools.build_sln_command(self.settings, solution_file, upgrade_project=False)
-                if self.settings.arch == "x86":
-                    build_command = build_command.replace("x86", "Win32")
-                command = "%s && %s" % (tools.vcvars_command(self.settings), build_command)
-                self.run(command)
+        with tools.chdir(self.source_subfolder):
+            solution_file = "libusb_2015.sln"
+            if self.settings.compiler.version == "12":
+                solution_file = "libusb_2013.sln"
+            elif self.settings.compiler.version == "11":
+                solution_file = "libusb_2012.sln"
+            solution_file = os.path.join("msvc", solution_file)
+            platforms = {"x86":"Win32"}
+            msbuild = MSBuild(self)
+            msbuild.build(solution_file, platforms=platforms, upgrade_project=False)
 
     def _build_mingw(self):
         env_build = AutoToolsBuildEnvironment(self)
