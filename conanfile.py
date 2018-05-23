@@ -4,7 +4,7 @@
 """Conan receipt package for USB Library
 """
 import os
-from conans import ConanFile, VisualStudioBuildEnvironment, AutoToolsBuildEnvironment, tools
+from conans import ConanFile, AutoToolsBuildEnvironment, tools
 
 
 class LibUSBConan(ConanFile):
@@ -13,12 +13,12 @@ class LibUSBConan(ConanFile):
     name = "libusb"
     version = "0.1.12"
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False]}
-    default_options = "shared=False"
+    options = {"shared": [True, False], "fPIC": [True, False]}
+    default_options = "shared=False", "fPIC=True"
     homepage = "https://github.com/libusb/libusb"
     url = "http://github.com/bincrafters/conan-libusb"
     author = "Bincrafters <bincrafters@gmail.com>"
-    license = "https://github.com/libusb/libusb/blob/master/COPYING"
+    license = "GPL-2"
     description = "A cross-platform library to access USB devices"
     source_subfolder = "source_subfolder"
     exports = ["LICENSE.md"]
@@ -36,14 +36,14 @@ class LibUSBConan(ConanFile):
 
     def build(self):
         env_build = AutoToolsBuildEnvironment(self)
-        env_build.fpic = True
+        env_build.fpic = self.options.fPIC
         env_build.flags.append('-w')
-        with tools.environment_append(env_build.vars):
-            configure_args = ['--prefix=%s' % self.package_folder]
-            with tools.chdir(self.source_subfolder):
-                env_build.configure(args=configure_args)
-                env_build.make(args=["all"])
-                env_build.make(args=["install"])
+        configure_args = ['--disable-build-docs']
+        configure_args.append('--disable-static' if self.options.shared else '--disable-shared')
+        with tools.chdir(self.source_subfolder):
+            env_build.configure(args=configure_args)
+            env_build.make(args=["all"])
+            env_build.make(args=["install"])
 
     def package(self):
         self.copy("COPYING", src=self.source_subfolder, dst="licenses", keep_path=False)
