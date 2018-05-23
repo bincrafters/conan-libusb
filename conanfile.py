@@ -34,7 +34,7 @@ class LibUSBConan(ConanFile):
     def config_options(self):
         if self.settings.os != "Linux":
             del self.options.enable_udev
-        if self.settings.os == "Windows":
+        if self.settings.os == "Windows" and self.settings.compiler == "Visual Studio":
             del self.options.fPIC
 
     def system_requirements(self):
@@ -69,8 +69,15 @@ class LibUSBConan(ConanFile):
             msbuild = MSBuild(self)
             msbuild.build(solution_file, platforms=platforms, upgrade_project=False)
 
+    def _build_autotools(self, configure_args=None):
+        env_build = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        env_build.fpic = self.options.fPIC
+        with tools.chdir(self.source_subfolder):
+            env_build.configure(args=configure_args)
+            env_build.make()
+            env_build.make(args=["install"])
+
     def _build_mingw(self):
-        env_build = AutoToolsBuildEnvironment(self, win_bash=True)
         configure_args = ['--enable-shared' if self.options.shared else '--disable-shared']
         configure_args.append('--enable-static' if not self.options.shared else '--disable-static')
         if self.settings.arch == "x86_64":
@@ -78,21 +85,13 @@ class LibUSBConan(ConanFile):
         if self.settings.arch == "x86":
             configure_args.append('--build=i686-w64-mingw32')
             configure_args.append('--host=i686-w64-mingw32')
-        with tools.chdir(self.source_subfolder):
-            env_build.configure(args=configure_args)
-            env_build.make()
-            env_build.make(args=["install"])
+        self._build_autotools(configure_args)
 
     def _build_unix(self):
-        env_build = AutoToolsBuildEnvironment(self)
-        env_build.fpic = self.options.fPIC
         configure_args = None
         if self.settings.os == "Linux":
             configure_args = ['--enable-udev' if self.options.enable_udev else '--disable-udev']
-        with tools.chdir(self.source_subfolder):
-            env_build.configure(args=configure_args)
-            env_build.make(args=["all"])
-            env_build.make(args=["install"])
+        self._build_autotools(configure_args)
 
     def build(self):
         if self.settings.os == "Windows" and self.settings.compiler == "Visual Studio":
