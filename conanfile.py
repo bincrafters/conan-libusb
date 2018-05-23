@@ -71,8 +71,7 @@ class LibUSBConan(ConanFile):
 
     def _build_mingw(self):
         env_build = AutoToolsBuildEnvironment(self, win_bash=True)
-        configure_args = ['--prefix="%s"' % self.package_folder]
-        configure_args.append('--enable-shared' if self.options.shared else '--disable-shared')
+        configure_args = ['--enable-shared' if self.options.shared else '--disable-shared']
         configure_args.append('--enable-static' if not self.options.shared else '--disable-static')
         if self.settings.arch == "x86_64":
             configure_args.append('--host=x86_64-w64-mingw32')
