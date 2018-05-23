@@ -4,7 +4,7 @@
 """Conan receipt package for USB Library
 """
 import os
-from conans import ConanFile, VisualStudioBuildEnvironment, AutoToolsBuildEnvironment, tools
+from conans import ConanFile, AutoToolsBuildEnvironment, MSBuild, tools
 
 
 class LibUSBConan(ConanFile):
@@ -13,12 +13,12 @@ class LibUSBConan(ConanFile):
     name = "libusb"
     version = "1.0.21"
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False], "enable_udev": [True, False]}
-    default_options = "shared=False", "enable_udev=True"
+    options = {"shared": [True, False], "enable_udev": [True, False], "fPIC": [True, False]}
+    default_options = "shared=False", "enable_udev=True", "fPIC=True"
     homepage = "https://github.com/libusb/libusb"
     url = "http://github.com/bincrafters/conan-libusb"
     author = "Bincrafters <bincrafters@gmail.com>"
-    license = "https://github.com/libusb/libusb/blob/master/COPYING"
+    license = "GPL-2"
     description = "A cross-platform library to access USB devices"
     source_subfolder = "source_subfolder"
     exports = ["LICENSE.md"]
@@ -34,6 +34,8 @@ class LibUSBConan(ConanFile):
     def config_options(self):
         if self.settings.os != "Linux":
             del self.options.enable_udev
+        if self.settings.os == "Windows" and self.settings.compiler == "Visual Studio":
+            del self.options.fPIC
 
     def system_requirements(self):
         if self.settings.os == "Linux":
@@ -56,68 +58,48 @@ class LibUSBConan(ConanFile):
                 package_tool.install(packages=libudev_name, update=True)
 
     def _build_visual_studio(self):
-        env_build = VisualStudioBuildEnvironment(self)
-        with tools.environment_append(env_build.vars):
-            with tools.chdir(self.source_subfolder):
-                solution_file = "libusb_2015.sln"
-                if self.settings.compiler.version == "12":
-                    solution_file = "libusb_2013.sln"
-                elif self.settings.compiler.version == "11":
-                    solution_file = "libusb_2012.sln"
-                solution_file = os.path.join("msvc", solution_file)
-                build_command = tools.build_sln_command(self.settings, solution_file, upgrade_project=False)
-                if self.settings.arch == "x86":
-                    build_command = build_command.replace("x86", "Win32")
-                command = "%s && %s" % (tools.vcvars_command(self.settings), build_command)
-                self.run(command)
+        with tools.chdir(self.source_subfolder):
+            solution_file = "libusb_2015.sln"
+            if self.settings.compiler.version == "12":
+                solution_file = "libusb_2013.sln"
+            elif self.settings.compiler.version == "11":
+                solution_file = "libusb_2012.sln"
+            solution_file = os.path.join("msvc", solution_file)
+            platforms = {"x86":"Win32"}
+            msbuild = MSBuild(self)
+            msbuild.build(solution_file, platforms=platforms, upgrade_project=False)
+
+    def _build_autotools(self, configure_args=None):
+        env_build = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        env_build.fpic = self.options.fPIC
+        with tools.chdir(self.source_subfolder):
+            env_build.configure(args=configure_args)
+            env_build.make()
+            env_build.make(args=["install"])
 
     def _build_mingw(self):
-        env_build = AutoToolsBuildEnvironment(self)
-        env_build.fpic = True
-        with tools.environment_append(env_build.vars):
-            configure_args = ['--prefix="%s"' % self.package_folder]
-            configure_args.append('--enable-shared' if self.options.shared else '--disable-shared')
-            configure_args.append('--enable-static' if not self.options.shared else '--disable-static')
-            if self.settings.arch == "x86_64":
-                configure_args.append('--host=x86_64-w64-mingw32')
-            if self.settings.arch == "x86":
-                configure_args.append('--build=i686-w64-mingw32')
-                configure_args.append('--host=i686-w64-mingw32')
-            with tools.chdir(self.source_subfolder):
-                tools.run_in_windows_bash(self, tools.unix_path("./configure %s" % ' '.join(configure_args)))
-                tools.run_in_windows_bash(self, tools.unix_path("make"))
-                tools.run_in_windows_bash(self, tools.unix_path("make install"))
+        configure_args = ['--enable-shared' if self.options.shared else '--disable-shared']
+        configure_args.append('--enable-static' if not self.options.shared else '--disable-static')
+        if self.settings.arch == "x86_64":
+            configure_args.append('--host=x86_64-w64-mingw32')
+        if self.settings.arch == "x86":
+            configure_args.append('--build=i686-w64-mingw32')
+            configure_args.append('--host=i686-w64-mingw32')
+        self._build_autotools(configure_args)
 
-    def _build_macos(self):
-        env_build = AutoToolsBuildEnvironment(self)
-        env_build.fpic = True
-        with tools.environment_append(env_build.vars):
-            configure_args = ['--prefix=%s' % self.package_folder]
-            with tools.chdir(self.source_subfolder):
-                self.run("./configure %s" % ' '.join(configure_args))
-                env_build.make(args=["all"])
-                env_build.make(args=["install"])
-
-    def _build_linux(self):
-        env_build = AutoToolsBuildEnvironment(self)
-        env_build.fpic = True
-        with tools.environment_append(env_build.vars):
-            configure_args = ['--prefix=%s' % self.package_folder]
-            configure_args.append('--enable-udev' if self.options.enable_udev else '--disable-udev')
-            with tools.chdir(self.source_subfolder):
-                env_build.configure(args=configure_args)
-                env_build.make(args=["all"])
-                env_build.make(args=["install"])
+    def _build_unix(self):
+        configure_args = None
+        if self.settings.os == "Linux":
+            configure_args = ['--enable-udev' if self.options.enable_udev else '--disable-udev']
+        self._build_autotools(configure_args)
 
     def build(self):
         if self.settings.os == "Windows" and self.settings.compiler == "Visual Studio":
             self._build_visual_studio()
         elif self.settings.os == "Windows" and self.settings.compiler == "gcc":
             self._build_mingw()
-        elif self.settings.os == "Linux":
-            self._build_linux()
         else:
-            self._build_macos()
+            self._build_unix()
 
     def _package_visual_studio(self):
         self.copy(pattern="libusb.h", dst=os.path.join("include", "libusb-1.0"), src=os.path.join(self.source_subfolder, "libusb"), keep_path=False)
