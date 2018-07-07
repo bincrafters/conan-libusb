@@ -18,7 +18,7 @@ class LibUSBConan(ConanFile):
     homepage = "https://github.com/libusb/libusb"
     url = "http://github.com/bincrafters/conan-libusb"
     author = "Bincrafters <bincrafters@gmail.com>"
-    license = "GPL-2"
+    license = "LGPL-2.1"
     description = "A cross-platform library to access USB devices"
     source_subfolder = "source_subfolder"
     exports = ["LICENSE.md"]
