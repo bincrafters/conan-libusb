@@ -88,9 +88,10 @@ class LibUSBConan(ConanFile):
         self._build_autotools(configure_args)
 
     def _build_unix(self):
-        configure_args = None
+        configure_args = ['--enable-shared' if self.options.shared else '--disable-shared']
+        configure_args.append('--enable-static' if not self.options.shared else '--disable-static')
         if self.settings.os == "Linux":
-            configure_args = ['--enable-udev' if self.options.enable_udev else '--disable-udev']
+            configure_args.append('--enable-udev' if self.options.enable_udev else '--disable-udev')
         self._build_autotools(configure_args)
 
     def build(self):
