@@ -11,7 +11,7 @@ class LibUSBConan(ConanFile):
     """Download libusb source, build and create package
     """
     name = "libusb"
-    version = "1.0.22"
+    version = "1.0.21"
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "enable_udev": [True, False], "fPIC": [True, False]}
     default_options = "shared=False", "enable_udev=True", "fPIC=True"
