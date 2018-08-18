@@ -53,6 +53,10 @@ class LibUSBConan(ConanFile):
                     libudev_name = "libudev-devel"
                     if tools.detected_architecture() == "x86_64" and str(self.settings.arch) == "x86":
                         libudev_name += ".i686"
+                elif os_info.with_zypper:
+                    libudev_name = "libudev-devel"
+                    if tools.detected_architecture() == "x86_64" and str(self.settings.arch) == "x86":
+                        libudev_name = "libudev-devel-32bit"
                 else:
                     raise Exception("Could not install libudev: Undefined package name for platform.")
                 package_tool.install(packages=libudev_name, update=True)
