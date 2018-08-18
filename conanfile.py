@@ -11,7 +11,7 @@ class LibUSBConan(ConanFile):
     """Download libusb source, build and create package
     """
     name = "libusb"
-    version = "1.0.21"
+    version = "1.0.22"
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "enable_udev": [True, False], "fPIC": [True, False]}
     default_options = "shared=False", "enable_udev=True", "fPIC=True"
@@ -53,8 +53,15 @@ class LibUSBConan(ConanFile):
                     libudev_name = "libudev-devel"
                     if tools.detected_architecture() == "x86_64" and str(self.settings.arch) == "x86":
                         libudev_name += ".i686"
+                elif os_info.with_zypper:
+                    libudev_name = "libudev-devel"
+                    if tools.detected_architecture() == "x86_64" and str(self.settings.arch) == "x86":
+                        libudev_name = "libudev-devel-32bit"
+                elif os_info.with_pacman:
+                    libudev_name = "libsystemd systemd"
                 else:
-                    raise Exception("Could not install libudev: Undefined package name for platform.")
+                    self.output.warn("Could not install libudev: Undefined package name for current platform.")
+                    return
                 package_tool.install(packages=libudev_name, update=True)
 
     def _build_visual_studio(self):
