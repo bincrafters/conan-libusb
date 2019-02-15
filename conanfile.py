@@ -47,8 +47,11 @@ class LibUSBConan(ConanFile):
                     libudev_name = "libudev-dev"
                     if tools.detected_architecture() == "x86_64" and str(self.settings.arch) == "x86":
                         libudev_name += ":i386"
-                    elif "x86" in tools.detected_architecture() and "arm" in str(self.settings.arch):
-                        libudev_name += ":armhf"
+                    elif "x86" in tools.detected_architecture():
+                        if str(self.settings.arch) == "armhf":
+                            libudev_name += ":armhf"
+                        elif str(self.settings.arch) == "arm64":
+                            libudev_name += ":arm64"
                 elif os_info.with_yum:
                     libudev_name = "libudev-devel"
                     if tools.detected_architecture() == "x86_64" and str(self.settings.arch) == "x86":
