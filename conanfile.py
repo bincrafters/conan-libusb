@@ -1,17 +1,9 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
-"""Conan receipt package for USB Library
-"""
-import os
 from conans import ConanFile, AutoToolsBuildEnvironment, MSBuild, tools
-
+import os
 
 class LibUSBConan(ConanFile):
-    """Download libusb source, build and create package
-    """
     name = "libusb"
-    version = "1.0.22"
+    version = "1.0.23"
     settings = "os", "compiler", "build_type", "arch"
     topics = ("conan", "libusb", "usb", "device")
     options = {"shared": [True, False], "enable_udev": [True, False], "fPIC": [True, False]}
@@ -27,11 +19,12 @@ class LibUSBConan(ConanFile):
     def source(self):
         release_name = "%s-%s" % (self.name, self.version)
         tools.get("{0}/releases/download/v{1}/{2}.tar.bz2".format(self.homepage, self.version, release_name),
-                  sha256="75aeb9d59a4fdb800d329a545c2e6799f732362193b465ea198f2aa275518157")
+                  sha256="db11c06e958a82dac52cf3c65cb4dd2c3f339c8a988665110e0d24d19312ad8d")
         os.rename(release_name, self._source_subfolder)
 
     def configure(self):
         del self.settings.compiler.libcxx
+        del self.settings.compiler.cppstd
 
     def config_options(self):
         if self.settings.os != "Linux":
@@ -71,7 +64,9 @@ class LibUSBConan(ConanFile):
 
     def _build_visual_studio(self):
         with tools.chdir(self._source_subfolder):
-            solution_file = "libusb_2015.sln"
+            solution_file = "libusb_2017.sln"
+            if self.settings.compiler.version == "14":
+                solution_file = "libusb_2015.sln"
             if self.settings.compiler.version == "12":
                 solution_file = "libusb_2013.sln"
             elif self.settings.compiler.version == "11":
