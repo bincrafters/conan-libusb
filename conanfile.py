@@ -1,32 +1,27 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
-"""Conan receipt package for USB Library
-"""
 import os
 from conans import ConanFile, AutoToolsBuildEnvironment, MSBuild, tools
 
 
 class LibUSBConan(ConanFile):
-    """Download libusb source, build and create package
-    """
     name = "libusb"
     version = "1.0.22"
     settings = "os", "compiler", "build_type", "arch"
+    topics = ("conan", "libusb", "usb", "device")
     options = {"shared": [True, False], "enable_udev": [True, False], "fPIC": [True, False]}
-    default_options = "shared=False", "enable_udev=True", "fPIC=True"
+    default_options = {'shared': False, 'enable_udev': True, 'fPIC': True}
     homepage = "https://github.com/libusb/libusb"
     url = "http://github.com/bincrafters/conan-libusb"
     author = "Bincrafters <bincrafters@gmail.com>"
     license = "LGPL-2.1"
     description = "A cross-platform library to access USB devices"
-    source_subfolder = "source_subfolder"
+    _source_subfolder = "source_subfolder"
     exports = ["LICENSE.md"]
 
     def source(self):
         release_name = "%s-%s" % (self.name, self.version)
-        tools.get("{0}/releases/download/v{1}/{2}.tar.bz2".format(self.homepage, self.version, release_name))
-        os.rename(release_name, self.source_subfolder)
+        tools.get("{0}/releases/download/v{1}/{2}.tar.bz2".format(self.homepage, self.version, release_name),
+                  sha256="75aeb9d59a4fdb800d329a545c2e6799f732362193b465ea198f2aa275518157")
+        os.rename(release_name, self._source_subfolder)
 
     def configure(self):
         del self.settings.compiler.libcxx
@@ -68,7 +63,7 @@ class LibUSBConan(ConanFile):
                 package_tool.install(packages=libudev_name, update=True)
 
     def _build_visual_studio(self):
-        with tools.chdir(self.source_subfolder):
+        with tools.chdir(self._source_subfolder):
             solution_file = "libusb_2015.sln"
             if self.settings.compiler.version == "12":
                 solution_file = "libusb_2013.sln"
@@ -82,7 +77,7 @@ class LibUSBConan(ConanFile):
     def _build_autotools(self, configure_args=None):
         env_build = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         env_build.fpic = self.options.fPIC
-        with tools.chdir(self.source_subfolder):
+        with tools.chdir(self._source_subfolder):
             env_build.configure(args=configure_args)
             env_build.make()
             env_build.make(args=["install"])
@@ -113,9 +108,9 @@ class LibUSBConan(ConanFile):
             self._build_unix()
 
     def _package_visual_studio(self):
-        self.copy(pattern="libusb.h", dst=os.path.join("include", "libusb-1.0"), src=os.path.join(self.source_subfolder, "libusb"), keep_path=False)
+        self.copy(pattern="libusb.h", dst=os.path.join("include", "libusb-1.0"), src=os.path.join(self._source_subfolder, "libusb"), keep_path=False)
         arch = "x64" if self.settings.arch == "x86_64" else "Win32"
-        source_dir = os.path.join(self.source_subfolder, arch, str(self.settings.build_type), "dll" if self.options.shared else "lib")
+        source_dir = os.path.join(self._source_subfolder, arch, str(self.settings.build_type), "dll" if self.options.shared else "lib")
         if self.options.shared:
             self.copy(pattern="libusb-1.0.dll", dst="bin", src=source_dir, keep_path=False)
             self.copy(pattern="libusb-1.0.lib", dst="lib", src=source_dir, keep_path=False)
@@ -126,12 +121,13 @@ class LibUSBConan(ConanFile):
             self.copy(pattern="libusb-usbdk-1.0.lib", dst="lib", src=source_dir, keep_path=False)
 
     def package(self):
-        self.copy("COPYING", src=self.source_subfolder, dst="licenses", keep_path=False)
+        self.copy("COPYING", src=self._source_subfolder, dst="licenses", keep_path=False)
         if self.settings.os == "Windows" and self.settings.compiler == "Visual Studio":
             self._package_visual_studio()
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.includedirs.append(os.path.join("include", "libusb-1.0"))
         if self.settings.os == "Linux":
             self.cpp_info.libs.append("pthread")
             if self.options.enable_udev:
