@@ -1,15 +1,8 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
-"""Conan receipt package for USB Library
-"""
 import os
 from conans import ConanFile, AutoToolsBuildEnvironment, MSBuild, tools
 
 
 class LibUSBConan(ConanFile):
-    """Download libusb source, build and create package
-    """
     name = "libusb"
     version = "1.0.22"
     settings = "os", "compiler", "build_type", "arch"
