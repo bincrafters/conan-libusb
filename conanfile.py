@@ -10,7 +10,6 @@ class LibUSBConan(ConanFile):
     default_options = {'shared': False, 'enable_udev': True, 'fPIC': True}
     homepage = "https://github.com/libusb/libusb"
     url = "http://github.com/bincrafters/conan-libusb"
-    author = "Bincrafters <bincrafters@gmail.com>"
     license = "LGPL-2.1"
     description = "A cross-platform library to access USB devices"
     _source_subfolder = "source_subfolder"
